@@ -41,6 +41,16 @@ source ~/.bashrc
 source ~/.profile
 pip install ./pyspark-3.1.3.tar.bz2
 ```
+# ติดตั้ง Apache Iceberg
+```bash
+wget https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-{version same PySpark}/1.1.0/iceberg-spark-{version same PySpark}-1.1.0.jar
+wget https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-hive-runtime/1.1.0/iceberg-hive-runtime-1.1.0.jar
+mv iceberg-spark-{version same PySpark}-1.1.0.jar /opt/spark/jars/
+mv iceberg-hive-runtime-1.1.0.jar /opt/spark/jars/
+su hive
+$ add jar /opt/spark/jars/iceberg-spark-{version same PySpark}-1.1.0.jar
+$ add jar /opt/spark/jars/iceberg-hive-runtime-1.1.0.jar
+```
 #### Schema ที่ใช้งานได้
 ```bash
 org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe
