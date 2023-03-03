@@ -51,6 +51,90 @@ su hive
 $ add jar /opt/spark/jars/iceberg-spark-{version same PySpark}-1.1.0.jar
 $ add jar /opt/spark/jars/iceberg-hive-runtime-1.1.0.jar
 ```
+# ตัวอย่างการใช้งาน Iceberg
+```py
+from pyspark.sql import SparkSession
+from pyspark.sql.types import *
+from pyspark.sql.functions import *
+import pyspark
+import pandas as pd
+import os
+import requests
+from datetime import datetime
+#-----------------รูปแบบการ Connection Context แบบที่ 1 คือ ใช้งานผ่าน Linux Localfile
+LOCAL_PATH="iceberg_local_db"
+conf = (
+    pyspark.SparkConf()
+        .setAppName('Application_Name')
+        .set('spark.jars.packages', 'org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.0.0,software.amazon.awssdk:bundle:2.17.178,software.amazon.awssdk:url-connection-client:2.17.178')
+        .set('spark.jars', '/opt/spark/iceberg-hive-runtime-1.1.0.jar')
+        .set('spark.sql.extensions', 'org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions')
+        .set('spark.sql.catalog.iceberg', 'org.apache.iceberg.spark.SparkCatalog')
+        .set('spark.sql.catalog.iceberg.type', 'hadoop')
+        .set(f'spark.sql.catalog.iceberg.warehouse', '{LOCAL_PATH}')
+)
+spark = SparkSession.builder.config(conf=conf).getOrCreate()
+##-----------------รูปแบบการ Connection Context แบบที่ 2 คือ ใช้งานผ่าน HDFS
+os.environ['HADOOP_CONF_DIR'] = '/etc/hadoop/conf'
+os.environ['JAVA_HOME'] = '/usr/lib/jvm/jre-1.8.0-openjdk'
+os.environ['HADOOP_USER_NAME']='hive'
+os.environ['PYSPARK_PYTHON'] ='/root/anaconda3/bin/python'
+
+HDFS_PATH="hdfs:/spark/iceberg/default"
+HDFS_METASTORE="thrift://nook.bigdata:9083"
+
+conf = pyspark.SparkConf().setAll([
+     ('spark.sql.catalog.default', 'org.apache.iceberg.spark.SparkCatalog'),
+     ('spark.sql.catalog.default.type', 'hive'),
+     ('spark.sql.catalog.default.warehouse', f'{HDFS_PATH}'),
+     ('spark.jars', '/opt/spark/jars/iceberg-hive-runtime-1.1.0.jar'),
+     ('spark.jars.packages', 'org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.0.0,software.amazon.awssdk:bundle:2.17.178,software.amazon.awssdk:url-connection-client:2.17.178'),
+     ('spark.sql.extensions', 'org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions'),
+     ('spark.driver.memory', '2g'),
+     ('spark.sql.repl.eagerEval.enabled','true'),
+     ('hive.strict.managed.tables','false'),
+     ('hive.metastore.uris', f'{HDFS_METASTORE}'),
+     ('spark.sql.warehouse.dir', f'{HDFS_PATH}'),
+     ('metastore.client.capability.check','false'),
+    ])
+spark = SparkSession.builder \
+        .master("local[*]") \
+        .appName("Application_Name") \
+        .config(conf=conf) \
+        .enableHiveSupport() \
+        .getOrCreate()
+     
+## สร้าง Table แบบ Manual
+spark.sql("CREATE TABLE iceberg.table1 (name string) USING iceberg;")
+## เพิ่มข้อมูลได้โดยใช้คำสั่ง INSERT INTO
+spark.sql("INSERT INTO iceberg.table1 VALUES ('Nook'), ('Pasit'), ('Nooky')")
+## สร้าง Query ได้ผ่าน SELECT / Schema.Table
+df = spark.sql("SELECT * FROM iceberg.table1").show()
+df = spark.read.table("iceberg.table1").show()
+#เพิ่มข้อมูลโดยใช้ DataFrame จาก Pandas หรือ PySpark
+schema = StructType([
+    StructField("year", StringType(), True),
+    StructField("weeknum", StringType(), True),
+    StructField("province", StringType(), True),
+    StructField("new_case", IntegerType(), True),
+    StructField("total_case", IntegerType(), True),
+    StructField("new_case_excludeabroad", IntegerType(), True),
+    StructField("total_case_excludeabroad", IntegerType(), True),
+    StructField("new_death", IntegerType(), True),
+    StructField("total_death", IntegerType(), True),
+    StructField("update_date", StringType(), True),
+])
+df = spark.createDataFrame(pd.read_json("https://covid19.ddc.moph.go.th/api/Cases/today-cases-by-provinces"), schema)
+#ตัวอย่างการ Where ด้วย Function Filter
+df = df.filter("new_case != 0").filter("province != 'ทั้งประเทศ'").sort("new_case", ascending=False)
+#เขียนข้อมูลลง HDFS
+df.writeTo("iceberg.covid2").using("iceberg").createOrReplace() #create(), append(), replace()
+#แบบสามารถเปลี่ยน Format ได้
+df.writeTo("prod.db.table")
+    .tableProperty("write.format.default", "orc") #parquet, orc, avro
+    .partitionedBy("column name")
+    .createOrReplace()
+```
 #### Schema ที่ใช้งานได้
 ```bash
 org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe
