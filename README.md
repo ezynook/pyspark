@@ -85,7 +85,7 @@ HDFS_METASTORE="thrift://nook.bigdata:9083"
 
 conf = pyspark.SparkConf().setAll([
      ('spark.sql.catalog.default', 'org.apache.iceberg.spark.SparkCatalog'),
-     ('spark.sql.catalog.default.type', 'hive'),
+     ('spark.sql.catalog.default.type', 'hadoop'),
      ('spark.sql.catalog.default.warehouse', f'{HDFS_PATH}'),
      ('spark.jars', '/opt/spark/jars/iceberg-hive-runtime-1.1.0.jar'),
      ('spark.jars.packages', 'org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.0.0,software.amazon.awssdk:bundle:2.17.178,software.amazon.awssdk:url-connection-client:2.17.178'),
