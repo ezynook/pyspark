@@ -209,4 +209,4 @@ query = spqrk.read.table("default.tbl_covid").toPandas()
 query = spqrk.sql("insert into db.tb (col) values (col)").show()
 #Parguet type นี้ไม่สามารถใช้คำสั่ง DELETE & UPDATE ได้
 ```
-<b>By Pasit Y. @DataEngineer | Softnix Co.,Ltd | 2021-02-13</b>
+<b>By Pasit Y. @DataEngineer | Softnix Co.,Ltd | 2023-02-03</b>
