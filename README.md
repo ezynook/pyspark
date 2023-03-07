@@ -169,7 +169,7 @@ conf = pyspark.SparkConf().setAll([
      ('spark.driver.memory', '2g'), #ตามสเปคของเครื่องการทำงานรูปแบบ Memory (Lazy parallelize) อาจจะทำให้ stuck ได้
      ('spark.sql.repl.eagerEval.enabled','true'),
      ('hive.strict.managed.tables','false'),
-     ('spark.sql.warehouse.dir','/user/hive/warehouse/default'),
+     ('spark.sql.warehouse.dir','/user/hive/warehouse/default/covid_orc'),
      ('hive.metastore.uris', 'thrift://nn01.bigdata:9083'),
      ('metastore.client.capability.check','false')
     ])
@@ -191,14 +191,14 @@ schema = StructType([
     StructField("total_case_excludeabroad", IntegerType(), True),
     StructField("new_death", IntegerType(), True),
     StructField("total_death", IntegerType(), True),
-    StructField("update_date", TimestampType(), True)])
+    StructField("update_date", StringType(), True)])
 #อ่านข้อมูลจากตัวอย่าง API
-df = pd.read_json("https://covid19.ddc.moph.go.th/api/Cases/today-cases-by-provinces")
-df.to_csv('/tmp/tbl_covid_0.csv', sep=";", index=False)
+df = spark.createDataFrame(pd.read_json("https://covid19.ddc.moph.go.th/api/Cases/today-cases-by-provinces"), schema)
 #เขียนข้อมูลลง Hive
 df.write \
+    .format("orc, parquet")
     .mode("overwrite") \ #ถ้า Add New ใน ETL ใช้ append 
-    .option("path", "/user/hive/warehouse/default") \ #External Table
+    .option("path", "/user/hive/warehouse/default/covid_orc") \ #External Table
     .saveAsTable("default.tbl_covid")
 
 #Query
