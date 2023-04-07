@@ -4,7 +4,6 @@
 [-> Spark 3.1.3](https://softnix365-my.sharepoint.com/:u:/g/personal/pasit_softnix_co_th/EVmPpLHGex9DsbLwxLHqtAsB8Mt5bG8PXaxlZc5G3qO2Pw?e=DSWoaI)
 # วิธีติดตั้ง PySpark Offline Linux
 ```bash
-#online installer
 yum -y install java-1.8.0-openjdk #CentOS
 apt install default-jdk scala git -y #Ubuntu
 wget https://dlcdn.apache.org/spark/spark-3.1.3/spark-3.1.3-bin-hadoop2.7.tgz
@@ -20,26 +19,18 @@ export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
 export PYSPARK_PYTHON=/usr/bin/python3
 source ~/.bashrc
 source ~/.profile
+
+# ตั้งค่า Spark Default
+cd /opt/spark/conf
+cp spark-defaults.conf.template spark-defaults.conf
+vim spark-defaults.conf
+เอา # ออกและตั้งค่าดังนี้
+spark.master                     spark://master:7077
+spark.serializer                 org.apache.spark.serializer.KryoSerializer
+# Memory วิธีการปรับขึ้นอยู่กับขนาดของแต่ละ Host
+spark.driver.memory              2g
+
 pip install pyspark==3.1.3
-```
-```bash
-#Offline installer
-#Install Jdk and jre 8 before install this step
-yum -y install java-1.8.0-openjdk #CentOS
-apt install default-jdk scala git -y #Ubuntu
-tar xvf ./spark-3.1.3.tgz
-sudo mv spark-3.1.3.tgz/ /opt/spark 
-vim ~/.bashrc
-export SPARK_HOME=/opt/spark
-export PATH=$SPARK_HOME:$PATH
-export PYSPARK_PYTHON=/root/anaconda3/bin/python
-vim ~/.profile
-export SPARK_HOME=/opt/spark
-export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
-export PYSPARK_PYTHON=/usr/bin/python3
-source ~/.bashrc
-source ~/.profile
-pip install ./pyspark-3.1.3.tar.bz2
 ```
 # ติดตั้ง Apache Iceberg
 ```bash
