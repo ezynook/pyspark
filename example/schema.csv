@@ -1,0 +1,14 @@
+schema
+default
+delta_lake
+ais
+etl_j1
+etl_j4
+etl_j5
+etl_j6
+pyspark
+raw_data_j1
+raw_data_j3
+raw_data_j4
+raw_data_j5
+raw_data_j6
