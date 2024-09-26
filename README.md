@@ -2,6 +2,21 @@
 [-> PySpark 3.1.3](https://softnix365-my.sharepoint.com/:u:/g/personal/pasit_softnix_co_th/ESjyjPEsY-dJuPNyl7eoiXwBM4F9rYMNiO3uA4atHdQ82g?e=Z8SHDQ)
 
 [-> Spark 3.1.3](https://softnix365-my.sharepoint.com/:u:/g/personal/pasit_softnix_co_th/EVmPpLHGex9DsbLwxLHqtAsB8Mt5bG8PXaxlZc5G3qO2Pw?e=DSWoaI)
+
+# ติดตั้ง OpenJDK
+```bash
+cd /opt
+wget https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u222-b10/OpenJDK8U-jdk_x64_linux_hotspot_8u222b10.tar.gz
+tar -zxvf OpenJDK8U-jdk_x64_linux_hotspot_8u222b10.tar.gz
+mv jdk8u222-b10 jdk
+chown -R root:root jdk
+chmod -R 755 jdk
+vi /etc/profile
+export JAVA_HOME=/opt/jdk
+export PATH=$JAVA_HOME/bin:$PATH
+source  /etc/profile
+```
+
 # วิธีติดตั้ง PySpark Offline Linux
 ```bash
 yum -y install java-1.8.0-openjdk #CentOS
