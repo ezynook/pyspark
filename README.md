@@ -172,12 +172,15 @@ os.environ['HADOOP_USER_NAME']='hive'
 os.environ['PYSPARK_PYTHON'] ='/root/anaconda3/bin/python'
 conf = pyspark.SparkConf().setAll([
      ('spark.driver.maxResultSize', '0'),
-     ('spark.driver.memory', '2g'), #ตามสเปคของเครื่องการทำงานรูปแบบ Memory (Lazy parallelize) อาจจะทำให้ stuck ได้
+     ('spark.driver.memory', '2g'),
      ('spark.sql.repl.eagerEval.enabled','true'),
+     ('spark.sql.hive.metastore.jars', 'maven'),
+     ('spark.sql.hive.metastore.version', '1.2.1'),
+     ('spark.sql.catalogImplementation', 'hive'),
+     ('spark.sql.warehouse.dir', '/user/hive/warehouse'),
      ('hive.strict.managed.tables','false'),
-     ('spark.sql.warehouse.dir','/user/hive/warehouse/default/covid_orc'),
-     ('hive.metastore.uris', 'thrift://nn01.bigdata:9083'),
-     ('metastore.client.capability.check','false')
+     ('hive.metastore.uris', 'thrift://dcmgnt01.afsc:9083'),
+     ('hive.metastore.client.capability.check','false')
     ])
 spark = SparkSession.builder \
         .master("local[*]") \
